@@ -1,46 +1,104 @@
 #include "../include/io_handler.h"
+#include "../include/converter.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define STRING_SIZE 50
+#define STRING_SIZE 100
 
-binary_number** get_file_content(char *file_path) {
+enum bool {false, true};
 
-    FILE *input = fopen(file_path, "r");
+size_t sizes[] = {64, 11, 52};
+
+void convert_file(char *input_path, char *output_path) {
+
+    FILE *input = fopen(input_path, "r");
+    FILE *output = output_path == NULL ? stdout : fopen(output_path, "a");
 
     if (input == NULL) {
         perror("File does not exist!");
         exit(EXIT_FAILURE);
     }
 
-    binary_number **bn = calloc(sizeof(binary_number*), 1);
-    int current_index = 0;
-
-    char *buffer = malloc(STRING_SIZE);
+    char buffer[STRING_SIZE];
 
     while (fgets(buffer, STRING_SIZE, input) != NULL) {
-        
-        bn[current_index] = malloc(sizeof(binary_number));
-
-        int type = bn[current_index]->type = (strchr(buffer, '.') != NULL);
-
-        if (type == DECIMAL) bn[current_index]->number.d = strtoll(buffer, NULL, 10);
-        else if (type == FLOAT) bn[current_index]->number.f = atof(buffer);
-
-        current_index++;
-
-        bn = realloc(bn, sizeof(binary_number*) * (current_index + 1));
-        bn[current_index] = NULL;
+        if (strchr(buffer, '.') == NULL) {
+            i64 number = strtoll(buffer, NULL, 10);
+            fprintf(output, "%-15lld -> 0x%X\n", number, decimal_to_hex(number, sizes[0]));
+        } else {
+            double number = atof(buffer);
+            fprintf(output, "%-15G -> 0x%X\n", number, float_to_hex(number, sizes[1], sizes[2]));
+        }
     }
 
-    free(buffer);
     fclose(input);
+    if (output_path != NULL) {
+        printf("Results have been added to %s.\n", output_path);
+        fclose(output);
+    }
+}
 
-    return bn;
+int command_parser(char *buffer) {
+    switch (buffer[0]) {
+        case 'q':
+            exit(EXIT_SUCCESS);
+        case 'o':
+            printf("Decimal Size (in bits): ");
+            scanf("%zu", sizes);
+            printf("Exponent Size (in bits): ");
+            scanf("%zu", sizes + 1);
+            printf("Mantissa Size (in bits): ");
+            scanf("%zu", sizes + 2);
+            getc(stdin);
+            break;
+        case 'd':
+            sizes[0] = strtoull(buffer + 2, NULL, 10);
+            printf("Decimal size is set to %zu.\n", sizes[0]);
+            break;
+        case 'e':
+            sizes[1] = strtoull(buffer + 2, NULL, 10);
+            printf("Exponent size is set to %zu.\n", sizes[1]);
+            break;
+        case 'm':
+            sizes[2] = strtoull(buffer + 2, NULL, 10);
+            printf("Mantissa size is set to %zu.\n", sizes[2]);
+            break;
+        case 'f':
+            char *input_path = strtok_r(buffer + 2, " \n", &buffer);
+            char *output_path = strtok_r(buffer, " \n", &buffer);
+            convert_file(input_path, output_path);
+            break;
+        case 'h':
+            printf("Please check the README file. This section will be written in the future.\n");
+            break;
+        default:
+            return false;
+    }
+
+    return true;
 }
 
 void command_line_interface() {
+
+    for (;;) {
+
+        printf(">>> ");
+
+        char buffer[STRING_SIZE];
+        fgets(buffer, STRING_SIZE, stdin);
+
+        if (command_parser(buffer)) continue;
+
+        if (strchr(buffer, '.') == NULL) {
+            i64 number = strtoll(buffer, NULL, 10);
+            printf("%-15lld -> 0x%X\n", number, decimal_to_hex(number, sizes[0]));
+        } else {
+            double number = atof(buffer);
+            printf("%-15G -> 0x%X\n", number, float_to_hex(number, sizes[1], sizes[2]));
+        }
+
+    }
 
 }

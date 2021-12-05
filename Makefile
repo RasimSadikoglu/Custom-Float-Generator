@@ -10,4 +10,4 @@ run: ./bin/main
 	./bin/main input.txt
 
 clean:
-	rm ./bin/*
+	rm -f ./bin/*

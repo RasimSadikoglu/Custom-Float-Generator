@@ -3,7 +3,7 @@
 
 #include "binary_number.h"
 
-binary_number** get_file_content(char *file_path);
+void convert_file(char *input_path, char *output_path);
 void command_line_interface();
 
 #endif // IO_HANDLER_H

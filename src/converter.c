@@ -17,17 +17,17 @@ i64 get_shape(i64 decimal_size) {
     return shape;
 }
 
-i64 decimal_to_hex(binary_number *number, size_t decimal_size) {
+i64 decimal_to_hex(i64 number, size_t decimal_size) {
 
-    return number->number.d & get_shape(decimal_size);
+    return number & get_shape(decimal_size);
 }
 
-i64 float_to_hex(binary_number *number, size_t exponent_size, size_t mantissa_size) { 
+i64 float_to_hex(double number, size_t exponent_size, size_t mantissa_size) { 
 
-    if (exponent_size + mantissa_size > 63 || number->number.f == 0) return 0;
+    if (exponent_size + mantissa_size > 63 || number == 0) return 0;
 
     i64 num;
-    memcpy(&num, &(number->number.f), 8);
+    memcpy(&num, &number, 8);
 
     i64 mantissa = num & get_shape(D_MAN);
     i64 exponent = (num >> D_MAN) & get_shape(D_EXP);
@@ -36,7 +36,7 @@ i64 float_to_hex(binary_number *number, size_t exponent_size, size_t mantissa_si
     /* Mantissa */
     i64 round_size = D_MAN - mantissa_size;
 
-    if (round_size) {
+    if (round_size > 0) {
         i64 round_part = mantissa & get_shape(round_size);
         mantissa = mantissa >> (round_size);
 
@@ -66,6 +66,7 @@ i64 float_to_hex(binary_number *number, size_t exponent_size, size_t mantissa_si
         mantissa >>= exponent * -1 + 1;
         exponent = 0;
     }
+    /* Exponent */
 
     return (sign << (exponent_size + mantissa_size)) | (exponent << mantissa_size) | mantissa;
 }
