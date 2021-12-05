@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#include "binary_number.h"
+typedef long long i64;
 
 i64 decimal_to_hex(i64 number, size_t decimal_size);
 i64 float_to_hex(double number, size_t exponent_size, size_t mantissa_size);

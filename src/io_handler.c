@@ -1,8 +1,6 @@
 #include "../include/io_handler.h"
-#include "../include/converter.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define STRING_SIZE 100
