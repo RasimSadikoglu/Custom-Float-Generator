@@ -5,6 +5,8 @@
 
 #define STRING_SIZE 100
 
+#define input(TEXT, VAR) do { printf(TEXT); scanf("%zu", VAR); getc(stdin); } while(0)
+
 enum bool {false, true};
 
 size_t sizes[] = {64, 11, 52};
@@ -43,13 +45,9 @@ int command_parser(char *buffer) {
         case 'q':
             exit(EXIT_SUCCESS);
         case 'o':
-            printf("Decimal Size (in bits): ");
-            scanf("%zu", sizes);
-            printf("Exponent Size (in bits): ");
-            scanf("%zu", sizes + 1);
-            printf("Mantissa Size (in bits): ");
-            scanf("%zu", sizes + 2);
-            getc(stdin);
+            input("Decimal Size (in bits): ", sizes);
+            input("Exponent Size (in bits): ", sizes + 1);
+            input("Mantissa Size (in bits): ", sizes + 2);
             break;
         case 'd':
             sizes[0] = strtoull(buffer + 2, NULL, 10);
