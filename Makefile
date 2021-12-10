@@ -7,7 +7,7 @@ bin/main: ./bin $(OBJS)
 	mkdir bin
 
 run: ./bin/main
-	./bin/main input.txt
+	./bin/main
 
 clean:
 	rm -f ./bin/*

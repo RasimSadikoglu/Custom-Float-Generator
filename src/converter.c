@@ -5,11 +5,13 @@
 #define D_EXP 11
 #define D_MAN 52
 
-i64 get_shape(i64 decimal_size) {
+i64 get_shape(size_t decimal_size) {
+
+    if (decimal_size > 64) decimal_size = 64;
 
     i64 shape = 0;
     
-    for (; decimal_size > 0; decimal_size--) {
+    for (; decimal_size != 0; decimal_size--) {
         shape <<= 1;
         shape++;
     }
@@ -22,9 +24,9 @@ i64 decimal_to_hex(i64 number, size_t decimal_size) {
     return number & get_shape(decimal_size);
 }
 
-i64 float_to_hex(double number, size_t exponent_size, size_t mantissa_size) { 
+i64 float_to_hex(double number, size_t exponent_size, size_t mantissa_size) {
 
-    if (exponent_size + mantissa_size > 63 || number == 0) return 0;
+    if (number == 0) return 0;
 
     i64 num;
     memcpy(&num, &number, 8);
@@ -55,6 +57,7 @@ i64 float_to_hex(double number, size_t exponent_size, size_t mantissa_size) {
 
     /* Exponent */
     exponent += get_shape(exponent_size - 1) - get_shape(D_EXP - 1);
+    
 
     if (exponent >= get_shape(exponent_size)) {
         mantissa = 0;
@@ -67,6 +70,6 @@ i64 float_to_hex(double number, size_t exponent_size, size_t mantissa_size) {
         exponent = 0;
     }
     /* Exponent */
-
+    
     return (sign << (exponent_size + mantissa_size)) | (exponent << mantissa_size) | mantissa;
 }

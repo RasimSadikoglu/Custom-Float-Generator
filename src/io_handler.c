@@ -10,6 +10,7 @@
 enum bool {false, true};
 
 size_t sizes[] = {64, 11, 52};
+int force_float = true;
 
 void convert_file(char *input_path, char *output_path) {
 
@@ -24,12 +25,12 @@ void convert_file(char *input_path, char *output_path) {
     char buffer[STRING_SIZE];
 
     while (fgets(buffer, STRING_SIZE, input) != NULL) {
-        if (strchr(buffer, '.') == NULL) {
+        if (strchr(buffer, '.') == NULL && !force_float) {
             i64 number = strtoll(buffer, NULL, 10);
-            fprintf(output, "%-15lld -> 0x%X\n", number, decimal_to_hex(number, sizes[0]));
+            fprintf(output, "%-15lld -> 0x%lX\n", number, decimal_to_hex(number, sizes[0]));
         } else {
             double number = atof(buffer);
-            fprintf(output, "%-15G -> 0x%X\n", number, float_to_hex(number, sizes[1], sizes[2]));
+            fprintf(output, "%-15G -> 0x%lX\n", number, float_to_hex(number, sizes[1], sizes[2]));
         }
     }
 
@@ -50,19 +51,23 @@ int command_parser(char *buffer) {
             input("Mantissa Size (in bits): ", sizes + 2);
             break;
         case 'd':
-            sizes[0] = strtoull(buffer + 2, NULL, 10);
+            sizes[0] = strtoull(buffer + 1, NULL, 10);
             printf("Decimal size is set to %zu.\n", sizes[0]);
             break;
         case 'e':
-            sizes[1] = strtoull(buffer + 2, NULL, 10);
+            sizes[1] = strtoull(buffer + 1, NULL, 10);
             printf("Exponent size is set to %zu.\n", sizes[1]);
             break;
         case 'm':
-            sizes[2] = strtoull(buffer + 2, NULL, 10);
+            sizes[2] = strtoull(buffer + 1, NULL, 10);
             printf("Mantissa size is set to %zu.\n", sizes[2]);
             break;
         case 'f':
-            char *input_path = strtok_r(buffer + 2, " \n", &buffer);
+            if (buffer[1] == 'f') {
+                force_float = atoi(buffer + 2);
+                break;
+            }
+            char *input_path = strtok_r(buffer + 1, " \n", &buffer);
             char *output_path = strtok_r(buffer, " \n", &buffer);
             convert_file(input_path, output_path);
             break;
@@ -87,12 +92,12 @@ void command_line_interface() {
 
         if (command_parser(buffer)) continue;
 
-        if (strchr(buffer, '.') == NULL) {
+        if (strchr(buffer, '.') == NULL && !force_float) {
             i64 number = strtoll(buffer, NULL, 10);
-            printf("%-15lld -> 0x%X\n", number, decimal_to_hex(number, sizes[0]));
+            printf("%-15lld -> 0x%lX\n", number, decimal_to_hex(number, sizes[0]));
         } else {
             double number = atof(buffer);
-            printf("%-15G -> 0x%X\n", number, float_to_hex(number, sizes[1], sizes[2]));
+            printf("%-15g -> 0x%lX\n", number, float_to_hex((double)number, sizes[1], sizes[2]));
         }
 
     }
